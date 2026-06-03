@@ -749,7 +749,7 @@ const getToppingPrice = (topping: string) => {
   if (match) {
     return parseInt(match[1].replace(/\./g, ""), 10);
   }
-  if (tLower.includes("telur")) return 3000;
+  if (tLower.includes("telur")) return 4000;
   if (tLower.includes("sayur")) return 1000;
   if (tLower.includes("sosis")) return 1000;
   if (tLower.includes("cabe")) return 0;
@@ -3013,7 +3013,7 @@ export default function App() {
           </div>
         </div>
       )}
-      <div className="min-h-[100dvh] flex flex-col items-center justify-center p-0 md:p-4 bg-stone-100">
+      <div className="min-h-[100dvh] flex flex-col items-center justify-center p-0 md:p-4 bg-[#211710]">
         <div className="w-full max-w-[430px] bg-[#F5F2EA] h-[100dvh] md:h-[884px] md:max-h-[95vh] flex flex-col relative shadow-2xl md:rounded-[3rem] overflow-hidden border-0 md:border-8 border-white/20">
           <AnimatePresence>
             {notification && (
@@ -4815,7 +4815,7 @@ function OwnerScreen({
           { name: "Saus Sambal", defaultPrice: 0 },
         ]
       : [
-          { name: "Telur", defaultPrice: 3000 },
+          { name: "Telur", defaultPrice: 4000 },
           { name: "Sayur", defaultPrice: 0 },
           { name: "Cabe", defaultPrice: 0 },
           { name: "Sosis", defaultPrice: 1000 },
@@ -9843,8 +9843,8 @@ function OwnerScreen({
                                 const tPrice =
                                   matchPrice && matchPrice[2]
                                     ? parseInt(matchPrice[2])
-                                    : tName.toLowerCase() === "telur"
-                                      ? 3000
+                                    : (tName.toLowerCase() === "telur" || tName.toLowerCase() === "telur rebus")
+                                      ? 4000
                                       : tName.toLowerCase() === "sosis"
                                         ? 1000
                                         : 0;
@@ -11831,7 +11831,7 @@ function HomeScreen({
       {/* Owner Dashboard Button */}
 
       {/* Bottom Nav */}
-      <div className="absolute bottom-0 left-0 right-0 w-full h-24 bg-[#3D2B1F] flex items-center justify-between px-10 rounded-t-[3.5rem] shadow-2xl z-50">
+      <div className="absolute bottom-[-2px] left-0 right-0 w-full h-[98px] pb-[2px] bg-[#3D2B1F] flex items-center justify-between px-10 rounded-t-[3.5rem] shadow-2xl z-50">
         <button
           onClick={() => setActiveTab("home")}
           className={`flex flex-col items-center gap-1 transition-colors ${activeTab === "home" ? "text-white" : "text-white/40"}`}
@@ -12172,7 +12172,7 @@ function CheckoutScreen({
   const totalPayment = cart.reduce((sum, item) => sum + item.totalPrice, 0);
 
   const toppingsPriceMap: { [key: string]: number } = {
-    "Telur Rebus": 3000,
+    "Telur Rebus": 4000,
     Sosis: 1000,
     "Saus Tomat": 0,
     "Saus Sambal": 0,
@@ -12184,7 +12184,7 @@ function CheckoutScreen({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="flex flex-col h-full"
+      className="flex flex-col h-full bg-[#F5F2EA]"
     >
       <div className="flex-1 overflow-y-auto pb-8">
         {/* Header */}
@@ -12625,7 +12625,7 @@ function DetailScreen({
           { name: "Saus Sambal", price: 0 },
         ]
       : [
-          { name: "Telur Rebus", price: 3000 },
+          { name: "Telur Rebus", price: 4000 },
           { name: "Sosis", price: 1000 },
         ];
 
@@ -12691,10 +12691,10 @@ function DetailScreen({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
-      className="flex flex-col h-full bg-white"
+      className="flex flex-col h-full bg-[#F5F2EA]"
     >
       <div className="flex-1 overflow-y-auto pb-8">
-        <div className="relative h-[350px] w-full shrink-0 bg-white">
+        <div className="relative h-[350px] w-full shrink-0 bg-[#F5F2EA]">
           <img
             src={item.img}
             className="w-full h-full object-cover object-center"
@@ -13339,7 +13339,7 @@ function OrdersScreen({
       </div>
 
       {/* Bottom Nav */}
-      <div className="absolute bottom-0 left-0 right-0 w-full h-24 bg-[#3D2B1F] flex items-center justify-between px-6 rounded-t-[3.5rem] shadow-2xl z-50">
+      <div className="absolute bottom-[-2px] left-0 right-0 w-full h-[98px] pb-[2px] bg-[#3D2B1F] flex items-center justify-between px-6 rounded-t-[3.5rem] shadow-2xl z-50">
         <button
           onClick={() => onGoHome("home")}
           className="flex flex-col items-center gap-1 transition-colors text-white/40"
@@ -13520,7 +13520,7 @@ function EditCartItemModal({
           { name: "Saus Sambal", price: 0 },
         ]
       : [
-          { name: "Telur Rebus", price: 3000 },
+          { name: "Telur Rebus", price: 4000 },
           { name: "Sosis", price: 1000 },
         ];
 
