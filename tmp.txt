@@ -1,0 +1,341 @@
+9:  AreaChart,
+10:  Area,
+11:  XAxis,
+12:  YAxis,
+13:  CartesianGrid,
+14:  Tooltip,
+15:  ResponsiveContainer,
+16:  BarChart,
+17:  Bar,
+18:  Legend,
+25:  collection,
+26:  doc,
+27:  onSnapshot,
+28:  setDoc,
+29:  updateDoc,
+30:  deleteDoc,
+31:  addDoc,
+32:  query,
+33:  orderBy,
+34:  limit,
+35:  where,
+36:  getDocs,
+37:  writeBatch,
+38:  serverTimestamp,
+39:  getDocFromServer,
+40:  increment,
+41:  deleteField,
+42:  runTransaction,
+46:  onAuthStateChanged,
+47:  signInWithPopup,
+48:  signOut,
+49:  signInAnonymously,
+52:  Bell,
+53:  ChevronDown,
+54:  Search,
+55:  SlidersHorizontal,
+56:  Flame,
+57:  Utensils,
+58:  Soup,
+59:  IceCream,
+60:  Star,
+61:  Clock,
+62:  Bike,
+63:  Home,
+64:  ReceiptText,
+65:  User,
+66:  ArrowLeft,
+67:  MapPin,
+68:  Wallet,
+69:  CreditCard,
+70:  CheckCircle,
+71:  Circle,
+72:  ShoppingBag,
+73:  Minus,
+74:  Plus,
+75:  QrCode,
+76:  Banknote,
+77:  ChevronRight,
+78:  Settings,
+79:  Lock,
+80:  Phone,
+81:  Mail,
+82:  HelpCircle,
+83:  LogOut,
+84:  LogIn,
+85:  Trash2,
+86:  BellRing,
+87:  Bird,
+88:  Cookie,
+89:  RefreshCw,
+90:  AlertTriangle,
+91:  TrendingUp,
+92:  BarChart3,
+93:  ShoppingCart,
+94:  LayoutDashboard,
+95:  AlertCircle,
+96:  Package,
+97:  Egg,
+98:  Leaf,
+99:  Box,
+100:  Droplet,
+101:  Sparkles,
+102:  X,
+103:  Coffee,
+104:  Camera,
+105:  Edit,
+106:  Download,
+107:  Pencil,
+108:  UploadCloud,
+109:  CheckSquare,
+110:  Square,
+111:  Beef,
+112:  Check,
+113:  Calendar,
+114:  Image as ImageIcon,
+115:  FileText,
+116:  Paperclip,
+117:  FileImage,
+118:  ClipboardList,
+119:  Play,
+126:  item: any;
+127:  quantity: number;
+128:  toppings: string[];
+129:  accumulatedToppings?: string[];
+130:  totalPrice: number;
+131:  notes?: string;
+135:  id: string;
+136:  orderNumber?: string;
+137:  firebaseKey?: string;
+138:  customerName: string;
+139:  customerPhone?: string;
+140:  customerEmail?: string;
+141:  customerAddress?: string;
+142:  paymentMethod?: string;
+143:  items: CartItem[];
+144:  total: number;
+145:  notes?: string;
+146:  timestamp: Date;
+147:  status: "diterima" | "dimasak" | "diantar" | "selesai" | "dibatalkan";
+148:  paymentStatus: "belum" | "lunas";
+149:  rating?: number;
+150:  feedback?: string;
+151:  appRating?: number;
+152:  appFeedback?: string;
+153:  sessionId?: string;
+154:  uid?: string | null;
+155:  isManual?: boolean;
+156:  manualProfit?: number;
+157:  calculatedProfit?: number;
+158:  isReadyForNotify?: boolean;
+159:  isDeleted?: boolean;
+160:  isDemo?: boolean;
+161:  attachmentUrl?: string;
+162:  attachmentType?: "image" | "file";
+163:  attachmentName?: string;
+164:  fileUrl?: string;
+168:  const orderDateStr = (
+173:  const sameDayOrders = orders.filter((o) => {
+183:  sameDayOrders.sort((a, b) => {
+195:  const index = sameDayOrders.findIndex(
+200:  if (index === -1) return "01";
+201:  return String(index + 1).padStart(2, "0");
+205:  id?: string;
+206:  type?: string;
+207:  rating: number;
+208:  comment: string;
+209:  timestamp: Date;
+210:  userName?: string;
+211:  userEmail?: string;
+215:  isFirebaseConfigured: boolean,
+216:  orders: Order[],
+217:  targetDate: Date = new Date(),
+219:  let nextNumber = 1;
+222:  const dateStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, "0")}-${String(targetDate.getDate()).padStart(2, "0")}`;
+224:  const dayStart = new Date(targetDate);
+225:  dayStart.setHours(0, 0, 0, 0);
+226:  const dayEnd = new Date(targetDate);
+227:  dayEnd.setHours(23, 59, 59, 999);
+229:  console.log("Generating next order number for:", dateStr);
+231:  const getLocalNextNumber = () => {
+259:  if (isFirebaseConfigured) {
+301:  return nextNumber.toString().padStart(2, "0");
+307:  CREATE = "create",
+308:  UPDATE = "update",
+309:  DELETE = "delete",
+310:  LIST = "list",
+311:  GET = "get",
+312:  WRITE = "write",
+316:  error: string;
+317:  operationType: OperationType;
+318:  path: string | null;
+319:  authInfo: {
+335:  if (!items || !Array.isArray(items)) return [];
+336:  const grouped: CartItem[] = [];
+337:  items
+362:  return grouped;
+366:  error: unknown,
+367:  operationType: OperationType,
+368:  path: string | null,
+370:  const errorMessage = error instanceof Error ? error.message : String(error);
+373:  if (
+383:  const errInfo: FirestoreErrorInfo = {
+402:  console.error("Firestore Error: ", JSON.stringify(errInfo));
+403:  throw new Error(JSON.stringify(errInfo));
+407:  any,
+410:  state = { hasError: false, error: null };
+411:  props: any;
+412:  constructor(props: any) {
+416:  static getDerivedStateFromError(error: any) {
+420:  componentDidCatch(error: any, errorInfo: any) {
+424:  render() {
+720:  const tLower = topping.toLowerCase();
+721:  const match = tLower.match(/\+?rp\s*([\d\.]+)/);
+722:  if (match) {
+725:  if (tLower.includes("telur")) return 3000;
+726:  if (tLower.includes("sayur")) return 1000;
+727:  if (tLower.includes("sosis")) return 1000;
+728:  if (tLower.includes("cabe")) return 0;
+729:  return 0;
+733:  itemName: string,
+734:  basePrice: number,
+735:  toppings: string[],
+737:  let total = basePrice;
+738:  toppings.forEach((t) => {
+741:  return total;
+745:  const isGoreng = itemName.includes("Goreng");
+746:  const isSoto = itemName.includes("Soto");
+747:  const isRendang = itemName.includes("Rendang");
+748:  const isTelurGulung = itemName.includes("Telur Gulung");
+750:  let telurCount = 0;
+751:  let sosisCount = 0;
+752:  toppings.forEach((t) => {
+758:  const operasional = 415;
+759:  let bahan = 0;
+761:  if (isGoreng) {
+783:  return bahan + operasional;
+787:  const time = order.timestamp.toLocaleTimeString("id-ID", {
+792:  let text = `*PESANAN BARU - INDOMI NITE*\n`;
+793:  text += `--------------------------------\n`;
+794:  text += `Nama Pelanggan: ${order.customerName}\n`;
+795:  if (order.customerPhone) {
+799:  if (order.customerAddress) {
+802:  text += `Jam Pemesanan: ${time}\n`;
+803:  text += `--------------------------------\n`;
+804:  text += `*Menu Pesanan:*\n`;
+805:  if (order.items && Array.isArray(order.items)) {
+837:  text += `--------------------------------\n`;
+838:  text += `Total Pembayaran: Rp ${(order.total || 0).toLocaleString()}\n`;
+839:  text += `Metode Pembayaran: ${order.paymentMethod || "TUNAI"}\n`;
+840:  text += `--------------------------------\n`;
+841:  return text;
+845:  try {
+859:  if (!email) return false;
+860:  const e = email.toLowerCase();
+861:  return OWNER_EMAILS.includes(e);
+865:  const [year, month, day] = dateStr.split("-").map(Number);
+866:  return new Date(year, month - 1, day);
+870:  const year = date.getFullYear();
+871:  const month = String(date.getMonth() + 1).padStart(2, "0");
+872:  const day = String(date.getDate()).padStart(2, "0");
+873:  return `${year}-${month}-${day}`;
+877:  label,
+878:  options,
+879:  current,
+880:  setVal,
+881:  number,
+883:  label: string;
+884:  options: string[];
+885:  current: string;
+886:  setVal: (v: string) => void;
+887:  number: string;
+919:  const [q1, setQ1] = useState("");
+920:  const [q2, setQ2] = useState("");
+921:  const [q3, setQ3] = useState("");
+922:  const [q4, setQ4] = useState("");
+923:  const [q5, setQ5] = useState("");
+924:  const [q6, setQ6] = useState("");
+926:  const handleSubmit = (e: React.FormEvent) => {
+931:  return (
+1017:  const [isDemoMode, setIsDemoMode] = useState<boolean>(() => {
+1028:  useEffect(() => {
+1032:  const [view, setView] = useState<View>(() => {
+1051:  const [showExitConfirmation, setShowExitConfirmation] = useState(false);
+1053:  useEffect(() => {
+1072:  useEffect(() => {
+1077:  const [address, setAddress] = useState(() =>
+1080:  const [addresses, setAddresses] = useState<any[]>([]);
+1081:  const [selectedItem, setSelectedItem] = useState<any>(() => {
+1090:  const [ratingOrder, setRatingOrder] = useState<Order | null>(null);
+1091:  const [showAppFeedbackModal, setShowAppFeedbackModal] = useState(false);
+1092:  const [currentOrderFirebaseKey, setCurrentOrderFirebaseKey] = useState<
+1095:  const [lastPlacedSessionId, setLastPlacedSessionId] = useState<string | null>(
+1098:  const [rating, setRating] = useState(0);
+1099:  const [feedback, setFeedback] = useState("");
+1100:  const [notification, setNotification] = useState<string | null>(null);
+1101:  const isPlacingOrderRef = useRef(false);
+1102:  const showNotification = (message: string) => {
+1107:  const handleAddAppFeedback = async (
+1169:  const [homeActiveTab, setHomeActiveTab] = useState(() =>
+1172:  const [homeActiveCategory, setHomeActiveCategory] = useState(() => {
+1176:  useEffect(() => {
+1180:  const [homeSearchQuery, setHomeSearchQuery] = useState("");
+1181:  const [cart, setCart] = useState<CartItem[]>(() => {
+1194:  const [demoOrders, setDemoOrders] = useState<Order[]>(() => {
+1212:  useEffect(() => {
+1216:  const [showDemoOrdersOwner, setShowDemoOrdersOwner] = useState(false);
+1218:  const [userRole, setUserRole] = useState<"guest" | "customer" | "owner">(
+1228:  const [isAuthReady, setIsAuthReady] = useState(false);
+1229:  const [currentUser, setCurrentUser] = useState<any>(null);
+1230:  const [isResettingData, setIsResettingData] = useState(false);
+1231:  const [isPerformingReset, setIsPerformingReset] = useState(false);
+1232:  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+1234:  useEffect(() => {
+1327:  const handleOwnerLogin = async () => {
+1359:  const handleLogout = async () => {
+1370:  const handleLogin = async () => {
+1379:  const [customerName, setCustomerName] = useState(() =>
+1382:  const [customerPhone, setCustomerPhone] = useState(() =>
+1385:  const [customerEmail, setCustomerEmail] = useState(() =>
+1388:  const [customerAddress, setCustomerAddress] = useState("");
+1389:  const [paymentMethod, setPaymentMethod] = useState("TUNAI");
+1391:  const [newOrderAlert, setNewOrderAlert] = useState<any | null>(null);
+1392:  const notifiedOrderIds = useRef<Set<string>>(new Set());
+1395:  useEffect(() => {
+1409:  useEffect(() => {
+1415:  const [feedbacks, setFeedbacks] = useState<AppFeedback[]>(() => {
+1431:  useEffect(() => {
+1434:  const prevOrdersRef = useRef<Order[]>([]);
+1436:  const [ownerSubView, setOwnerSubView] = useState<string | null>(() => {
+1440:  useEffect(() => {
+1448:  const [inventory, setInventory] = useState<any[]>(() => {
+1476:  const [orders, setOrders] = useState<Order[]>(() => {
+1506:  const [dismissedNotifs, setDismissedNotifs] = useState<string[]>(() => {
+1516:  const handleDismissNotif = (notifId: string) => {
+1524:  useEffect(() => {
+1543:  const isFirebaseConfigured = useMemo(() => {
+1547:  useEffect(() => {
+1552:  useEffect(() => {
+1614:  useEffect(() => {
+1915:  useEffect(() => {
+1923:  useEffect(() => {
+1931:  useEffect(() => {
+1935:  useEffect(() => {
+1939:  useEffect(() => {
+1943:  useEffect(() => {
+1947:  useEffect(() => {
+1951:  useEffect(() => {
+1955:  useEffect(() => {
+1959:  const allOrdersForOwner = useMemo(() => {
+1968:  const { totalRevenue, totalOrders, revenueToday } = useMemo(() => {
+1994:  const handleSelectItem = (item: any) => {
+1999:  const handlePlaceOrder = async (
+3331:  function WelcomeScreen({ onStart }: { onStart: () => void }) {
+3415:  function OwnerScreen({
+10199:  function OrderHistoryCard({
+10415:  function HomeScreen({
+11795:  function CheckoutScreen({
+12283:  function DetailScreen({
+12557:  function OrdersScreen({
+13076:  function AppFeedbackModal({
+13163:  function EditCartItemModal({

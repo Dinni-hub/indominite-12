@@ -1,0 +1,285 @@
+174:    if (o.isDeleted) return false;
+180:    return isSameDay;
+189:    if (timeDiff !== 0) return timeDiff;
+192:    return aId.localeCompare(bId);
+200:  if (index === -1) return "01";
+201:  return String(index + 1).padStart(2, "0");
+233:      if (!o.timestamp) return false;
+240:      return (
+249:          if (!o.orderNumber) return 0;
+251:          return parseInt(clean, 10) || 0;
+254:      return maxOrderNumber + 1;
+256:    return 1;
+271:            return startNum;
+277:          return newCount;
+301:  return nextNumber.toString().padStart(2, "0");
+335:  if (!items || !Array.isArray(items)) return [];
+362:  return grouped;
+380:    return; // Don't throw, just log it
+417:    return { hasError: true, error };
+436:      return (
+457:    return this.props.children;
+723:    return parseInt(match[1].replace(/\./g, ""), 10);
+725:  if (tLower.includes("telur")) return 3000;
+726:  if (tLower.includes("sayur")) return 1000;
+727:  if (tLower.includes("sosis")) return 1000;
+728:  if (tLower.includes("cabe")) return 0;
+729:  return 0;
+741:  return total;
+778:    return bahan; // no operasional for custom add-ons
+783:  return bahan + operasional;
+807:      if (!cart || !cart.item) return;
+812:          return acc;
+825:              return cleanName;
+827:            return `${cleanName} x${count}`;
+841:  return text;
+846:    return localStorage.getItem(key) || defaultValue;
+848:    return defaultValue;
+859:  if (!email) return false;
+861:  return OWNER_EMAILS.includes(e);
+866:  return new Date(year, month - 1, day);
+873:  return `${year}-${month}-${day}`;
+911:  return (
+975:      return true;
+978:      return false;
+980:    return localStorage.getItem("app_isDemoMode") === "true";
+992:      if (saved === "owner" && userRole !== "owner") return "home";
+999:        return saved as View;
+1004:    return "welcome";
+1024:    return () => window.removeEventListener("popstate", handlePopState);
+1039:      if (saved) return JSON.parse(saved);
+1043:    return null;
+1116:          return { ...o, appRating, appFeedback };
+1118:        return o;
+1128:    return localStorage.getItem("app_homeCategory") || "Mie";
+1141:        if (Array.isArray(parsed)) return parsed.filter(Boolean);
+1146:    return [];
+1155:          return parsed.map((o: any) => ({
+1164:    return [];
+1177:        return (saved as any) || "guest";
+1179:        return "guest";
+1218:        return;
+1246:              return;
+1281:    return () => unsubscribe();
+1377:        return parsed.map((f: any) => ({
+1385:    return [];
+1394:    return localStorage.getItem("app_ownerSubView") || null;
+1421:            return (
+1425:          return merged;
+1431:    return DEFAULT_INVENTORY;
+1439:          return parsed.reduce((acc: any[], o: any) => {
+1453:            return acc;
+1460:    return [];
+1466:      if (saved) return JSON.parse(saved);
+1470:    return [];
+1477:      return updated;
+1501:    return true;
+1519:          if (!o.timestamp) return false;
+1526:          return (
+1536:              if (!o.orderNumber) return 0;
+1538:              return parseInt(clean, 10) || 0;
+1567:      return () => clearTimeout(timeoutId);
+1596:              return {
+1629:              return final;
+1725:              return {
+1758:              return final;
+1779:                return { ...o, timestamp };
+1799:              return (
+1843:              return {
+1864:      return () => {
+1919:      return combined.filter((o) => o.isDemo || String(o.id).includes("DEMO"));
+1921:    return combined.filter((o) => !o.isDemo && !String(o.id).includes("DEMO"));
+1935:        return time.toDateString() === today;
+1943:    return {
+1962:    if (isPlacingOrderRef.current) return;
+1963:    if (!cart || cart.length === 0) return;
+2286:            return acc;
+2299:                return cleanName;
+2301:              return `${cleanName} x${count}`;
+2335:      return;
+2394:      return;
+2437:      return newCart;
+2457:      return;
+2466:      return;
+2493:            return;
+2553:      return;
+2559:    if (!order) return;
+2605:        return final;
+2620:        return;
+2648:        return updatedOrders;
+2664:      return;
+2685:        return updatedOrders;
+2697:      return;
+2716:        return updatedOrders;
+2722:  return (
+3081:                    return newCart;
+3083:                    return [...prev, cartDetails];
+3107:                    return newCart;
+3109:                    return [...prev, cartDetails];
+3196:  return (
+3368:    return getLocalStorageItem("owner_active_tab", "beranda") as any;
+3403:    if (!file) return;
+3408:      return;
+3493:    if (!file) return;
+3622:          return items;
+3705:          return timestamp;
+3834:                return cDate.toDateString() === today.toDateString();
+3845:                      return cDate.toDateString() === today.toDateString();
+3962:            return {
+3986:              if (timeDiff !== 0) return timeDiff;
+3989:              return bId.localeCompare(aId);
+3992:            return final;
+4119:      return;
+4130:          return;
+4145:    if (!newItem.name) return;
+4189:    return getLocalStorageItem("app_reportFilterDate", localStr);
+4253:    return validOrders.reduce((totalProfit, order) => {
+4255:        return (
+4261:      return totalProfit + Math.round((order.total || 0) * 0.3173);
+4283:          if (o.isManual && o.sessionId === "manual_adjustment") return null; // Exclude manual adjustments, but keep bulk_import
+4289:          if (matchingItems.length === 0) return null;
+4300:          return {
+4309:        if (o.isManual && o.sessionId === "manual_adjustment") return false;
+4315:        return matchingItems.length > 0;
+4319:        return {
+4454:        return yA !== yB ? yA - yB : mA - mB;
+4459:        return {
+4486:    return {
+4516:      return;
+4567:    return itemName === "Telur Gulung" || itemName === "Telur Gulung Sosis"
+4587:    if (!editingOrder) return;
+4603:        return sum + (tInfo ? tInfo.defaultPrice : 0);
+4619:    if (manualOrderSelectedItemId === null) return null;
+4621:    if (!item) return null;
+4628:      if (!customName) return null; // Cancelled
+4633:      if (customPriceStr === null) return null; // Cancelled
+4648:        return activePrice > 0 ? `${tName} +Rp ${activePrice}` : tName;
+4664:      return {
+4676:    return {
+4692:      return;
+4734:                return parsed > 0
+4738:              return tStr;
+4747:              return {
+4754:            return item;
+4760:          return updated;
+4770:        return;
+4776:        return;
+4780:        return;
+4876:    if (isSubmittingManualOrderRef.current) return;
+4881:      return;
+4885:      return;
+4904:          return;
+5085:          return;
+5175:    return hours.map((h) => ({
+5185:      return;
+5204:            return JSON.parse(f.comment);
+5206:            return null;
+5213:        return;
+5279:        if (o.isManual) return false;
+5280:        return (o.items || []).some(
+5321:    if (!feedbackToDelete) return;
+5351:          return updated;
+5364:    return ALL_MENU_ITEMS.map((item) => item.name).sort();
+5408:    return result;
+5419:    return (
+5493:              return (
+5563:  return (
+5671:                    return (
+5797:                            if (!e.target.value) return;
+5843:                        return (
+5974:                                    if (!toppingName) return;
+6010:                                if (currentToppings.length === 0) return null;
+6011:                                return (
+6014:                                      return (
+6065:                                      return (
+6071:                                  return (
+6359:                        return (
+6415:                      if (timeDiff !== 0) return timeDiff;
+6418:                      return bId.localeCompare(aId);
+6537:                              return (
+6548:                                    return (
+6587:                                            return (
+6780:                      if (timeDiff !== 0) return timeDiff;
+6783:                      return bId.localeCompare(aId);
+6897:                              return (
+6908:                                    return (
+6947:                                            return (
+7229:                  return (
+7374:                            return `Minggu ${weekNum}, ${year}`;
+7515:                          return (
+7600:                          return days;
+7750:                          return `${val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)}jt`;
+7754:                          return `${val.toFixed(0)}rb`;
+7756:                        return `${value}`;
+7864:                    if (timeDiff !== 0) return timeDiff;
+7867:                    return bId.localeCompare(aId);
+7890:                      if (timeDiff !== 0) return timeDiff;
+7893:                      return bId.localeCompare(aId);
+8058:                                  return (
+8069:                                        return (
+8113:                                                return (
+8338:                return (
+8434:                              return next;
+8803:                        return (
+8852:                          return (
+8895:                                          return false;
+8897:                                        return true;
+8921:                                      return [...filtered, ...newToppings];
+8988:                                return (
+9239:                        return (
+9288:                          return (
+9331:                                          return false;
+9333:                                        return true;
+9357:                                      return [...filtered, ...newToppings];
+9424:                                return (
+9975:  return (
+10027:            return (
+10248:    return localStorage.getItem("app_profileSubView") || null;
+10302:    if (!scrollRef.current) return;
+10317:    if (!isDragging || !scrollRef.current) return;
+10346:    if (hour >= 5 && hour < 11) return "Selamat Pagi";
+10347:    if (hour >= 11 && hour < 15) return "Selamat Siang";
+10348:    if (hour >= 15 && hour < 18) return "Selamat Sore";
+10349:    return "Selamat Malam";
+10354:  return (
+10402:                  if (dismissedNotifs.includes(String(o.id))) return false;
+10404:                  return (
+10659:                  if (timeDiff !== 0) return timeDiff;
+10662:                  return bId.localeCompare(aId);
+10724:                            return acc;
+10736:                            return (
+10751:                          return (
+11171:                              return;
+11432:                    if (dismissedNotifs.includes(String(o.id))) return false;
+11434:                    return (
+11469:                    return (
+11584:  if (!cart || cart.length === 0) return null;
+11595:  return (
+11660:                                    return acc;
+11676:                                  return (
+11686:                                return (
+11924:              if (isPlacingOrder) return;
+11929:                return;
+12033:        return newToppings;
+12035:      return prev;
+12040:    return selectedToppings.filter((t) => t === name).length;
+12077:  return (
+12127:                    return (
+12306:      return () => unsub();
+12327:    if (timeDiff !== 0) return timeDiff;
+12330:    return bId.localeCompare(aId);
+12351:    return () => clearInterval(interval);
+12358:  return (
+12417:                  return o.id !== primaryOrder.id && t < primaryTime && o.status !== "selesai" && o.status !== "dibatalkan" && !o.isDeleted;
+12440:              return (
+12567:                                    return acc;
+12579:                                  return (
+12609:                                                return (
+12759:  if (!show) return null;
+12761:  return (
+12856:  if (!show || !cartItem) return null;
+12884:        return newToppings;
+12886:      return prev;
+12891:    return selectedToppings.filter((t) => t === name).length;
+12905:  return (
+12971:                return (

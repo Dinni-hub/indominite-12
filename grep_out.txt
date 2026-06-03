@@ -1,0 +1,567 @@
+262-          errorMessage = "Maaf, Anda tidak memiliki izin untuk melakukan operasi ini.";
+263-        }
+264-      } catch (e) {
+265-        // Not a JSON error
+266-      }
+267:      return (
+268-        <div className="min-h-screen flex items-center justify-center bg-stone-100 p-6">
+269-          <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full text-center">
+270-            <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
+271-              <AlertTriangle size={32} />
+272-            </div>
+--
+693-        }
+694-      }
+695-    };
+696-
+697-    window.addEventListener('popstate', handlePopState);
+698:    return () => window.removeEventListener('popstate', handlePopState);
+699-  }, [view]);
+700-
+701-  useEffect(() => {
+702-    if (window.history.state?.view !== view) {
+703-      window.history.pushState({ view }, '');
+--
+808-  });
+809-
+810-  const [userRole, setUserRole] = useState<'guest' | 'customer' | 'owner'>(() => {
+811-    try {
+812-      const saved = localStorage.getItem('app_userRole');
+813:      return (saved as any) || 'guest';
+814-    } catch (e) {
+815-      return 'guest';
+816-    }
+817-  });
+818-  const [isAuthReady, setIsAuthReady] = useState(false);
+--
+904-          setUserRole('customer');
+905-        }
+906-      }
+907-      setIsAuthReady(true);
+908-    });
+909:    return () => unsubscribe();
+910-  }, []);
+911-
+912-  const handleOwnerLogin = async () => {
+913-    try {
+914-      const result = await signInWithPopup(auth, googleProvider);
+--
+1033-          const missingItems = DEFAULT_INVENTORY.filter(item => !existingIds.has(item.id));
+1034-          const merged = [...validParsed, ...missingItems];
+1035-          merged.sort((a, b) => {
+1036-            const indexA = DEFAULT_INVENTORY.findIndex(i => i.id === a.id);
+1037-            const indexB = DEFAULT_INVENTORY.findIndex(i => i.id === b.id);
+1038:            return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+1039-          });
+1040-          return merged;
+1041-        }
+1042-      }
+1043-    } catch (e) {
+--
+1154-          }
+1155-        }
+1156-      };
+1157-      
+1158-      const timeoutId = setTimeout(initCounter, 3000);
+1159:      return () => clearTimeout(timeoutId);
+1160-    }
+1161-  }, [orders.length, userRole, isFirebaseConfigured]);
+1162-
+1163-  useEffect(() => {
+1164-    if (isFirebaseConfigured) {
+--
+1320-        if (!snapshot.empty) {
+1321-          const inventoryData = snapshot.docs.map(doc => ({ ...doc.data(), firebaseKey: doc.id })) as any[];
+1322-          inventoryData.sort((a, b) => {
+1323-            const indexA = DEFAULT_INVENTORY.findIndex(i => i.id === a.id);
+1324-            const indexB = DEFAULT_INVENTORY.findIndex(i => i.id === b.id);
+1325:            return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+1326-          });
+1327-          setInventory(inventoryData);
+1328-          
+1329-          // Check for missing default inventory items and add them if owner
+1330-          if (userRole === 'owner' && currentUser) {
+--
+1370-          feedbacksList.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+1371-          setFeedbacks(feedbacksList);
+1372-        }, (error) => handleFirestoreError(error, OperationType.GET, 'app_feedback'));
+1373-      }
+1374-
+1375:      return () => {
+1376-        if (unsubscribeOrders) unsubscribeOrders();
+1377-        if (unsubscribeInventory) unsubscribeInventory();
+1378-        if (unsubscribeFeedbacks) unsubscribeFeedbacks();
+1379-      };
+1380-    }
+--
+1919-      });
+1920-    }
+1921-    showNotification("Pesanan dihapus permanen.");
+1922-  };
+1923-
+1924:  return (
+1925-    <ErrorBoundary>
+1926-      {showExitConfirmation && (
+1927-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
+1928-          <div className="bg-white rounded-3xl p-8 shadow-2xl w-full max-w-sm text-center">
+1929-            <h3 className="text-xl font-bold text-[#3D2B1F] mb-4">Keluar Aplikasi?</h3>
+--
+2307-    </ErrorBoundary>
+2308-  );
+2309-}
+2310-
+2311-function WelcomeScreen({ onStart }: { onStart: () => void }) {
+2312:  return (
+2313-    <div className="flex flex-col h-full bg-[#F5F2EA]">
+2314-      <div className="flex-1 flex flex-col items-center px-8 pt-6 pb-8 overflow-y-auto overflow-x-hidden">
+2315-        <div className="relative flex flex-col items-center mb-6">
+2316-          <div className="relative flex h-80 w-80 items-center justify-center rounded-full bg-white/40 border border-[#3D2B1F]/10 shadow-sm">
+2317-            <div className="z-10 flex h-64 w-64 items-center justify-center rounded-full bg-[#3D2B1F] text-[#F5F2EA] shadow-2xl overflow-hidden">
+--
+2411-  dismissedNotifs: string[], onDismissNotif: (id: string) => void
+2412-}) {
+2413-  console.log("OwnerScreen rendering");
+2414-
+2415-  const [activeTab, setActiveTab] = useState<'beranda' | 'laporan' | 'stok' | 'pengaturan' | 'rating' | 'sampah'>(() => {
+2416:    return (getLocalStorageItem('owner_active_tab', 'beranda') as any);
+2417-  });
+2418-
+2419-  useEffect(() => {
+2420-    localStorage.setItem('owner_active_tab', activeTab);
+2421-  }, [activeTab]);
+--
+3293-    
+3294-    setIsEditNominalModalOpen(false);
+3295-  };
+3296-
+3297-  const getToppingsForItem = (itemName: string) => {
+3298:    return (itemName === 'Telur Gulung' || itemName === 'Telur Gulung Sosis')
+3299-      ? [
+3300-          { name: 'Saus Tomat', defaultPrice: 0 },
+3301-          { name: 'Saus Sambal', defaultPrice: 0 }
+3302-        ]
+3303-      : [
+--
+3800-    }
+3801-    
+3802-    if (reportFilterMenu !== 'semua') {
+3803-      filteredOrders = filteredOrders.filter(o => {
+3804-        if (o.isManual) return false;
+3805:        return (o.items || []).some(i => i && i.item && i.item.name.toLowerCase() === reportFilterMenu.toLowerCase());
+3806-      });
+3807-    }
+3808-    
+3809-    filteredOrders.forEach(order => {
+3810-      const items = order.items && Array.isArray(order.items) ? order.items.filter(i => i && i.item).map(i => i.item.name).join('; ') : '';
+--
+3892-  const totalItemsSold = totalOrders; 
+3893-
+3894-  const lowStockItems = inventory.filter(item => item.stock <= (item.min || 0));
+3895-
+3896-  if (viewDetail) {
+3897:    return (
+3898-      <div className="flex flex-col h-full bg-[#F5F2EA] relative">
+3899-        
+3900-        {/* Header */}
+3901-        <div className="px-6 pt-4 pb-4 flex items-center justify-between">
+3902-          <button 
+--
+3953-
+3954-          <div className="space-y-4 mb-8">
+3955-            {inventory.map((item) => {
+3956-              const IconComponent = IconMap[item.icon] || Package;
+3957-              const isLowStock = item.stock <= (item.min || 0);
+3958:              return (
+3959-                <div key={item.id} className="bg-white p-4 rounded-2xl border border-[#3D2B1F]/5 shadow-sm flex items-center gap-4">
+3960-                  <div className={`h-16 w-16 rounded-xl overflow-hidden shrink-0 flex items-center justify-center ${item.color}`}>
+3961-                    {item.imageUrl ? (
+3962-                      <img src={item.imageUrl.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/')} alt={item.name} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+3963-                    ) : (
+--
+4002-        </div>
+4003-      </div>
+4004-    );
+4005-  }
+4006-
+4007:  return (
+4008-    <div className="flex flex-col h-full bg-[#F5F2EA] relative">
+4009-      {!isFirebaseConfigured && (
+4010-        <div className="bg-red-500 text-white px-6 py-2 text-[10px] font-bold text-center uppercase tracking-widest z-50">
+4011-          <p>Firebase Belum Terhubung</p>
+4012-          <p className="opacity-70 mt-0.5">Pastikan semua Secrets (API Key, URL, dll) sudah diisi dengan benar di menu Settings.</p>
+--
+4081-
+4082-                {orders.filter(o => !o.isDeleted && !dismissedNotifs.includes(String(o.id))).slice(0, 15).map(order => {
+4083-                  const title = `Pesanan Baru #${order.orderNumber || String(order.id).slice(-4).toUpperCase()}`;
+4084-                  const message = `Pelanggan ${order.customerName} baru saja memesan ${order.items.length} item.`;
+4085-
+4086:                  return (
+4087-                    <div key={order.id} className="mb-4 p-4 bg-white rounded-2xl shadow-sm border border-[#3D2B1F]/5 relative group">
+4088-                      <div className="flex justify-between items-start mb-2">
+4089-                        <span className="text-xs font-bold text-[#3D2B1F]/60 uppercase tracking-widest">{title}</span>
+4090-                        <div className="flex items-center gap-2">
+4091-                          <span className="text-[10px] text-[#3D2B1F]/40">
+--
+4407-                                  allItems[tName] = (allItems[tName] || 0) + 1;
+4408-                                });
+4409-                              }
+4410-                            });
+4411-
+4412:                            return (
+4413-                              <div className="space-y-1.5">
+4414-                                {Object.entries(allItems).map(([name, qty], idx) => (
+4415-                                  <div key={idx} className="flex justify-between items-start">
+4416-                                    <span className="text-sm font-bold text-[#3D2B1F]">
+4417-                                      {name} - {qty}
+--
+4590-                                  allItems[tName] = (allItems[tName] || 0) + 1;
+4591-                                });
+4592-                              }
+4593-                            });
+4594-
+4595:                            return (
+4596-                              <div className="space-y-1.5">
+4597-                                {Object.entries(allItems).map(([name, qty], idx) => (
+4598-                                  <div key={idx} className="flex justify-between items-start">
+4599-                                    <span className="text-sm font-bold text-[#3D2B1F]">
+4600-                                      {name} - {qty}
+--
+4906-
+4907-                    {reportFilterType === 'bulan' ? (
+4908-                      <div className="grid grid-cols-3 gap-2">
+4909-                        {['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'].map((m, i) => {
+4910-                          const isSelected = parseDateString(reportFilterDate).getMonth() === i;
+4911:                          return (
+4912-                            <button
+4913-                              key={m}
+4914-                              onClick={(e) => {
+4915-                                e.stopPropagation();
+4916-                                const d = parseDateString(reportFilterDate);
+--
+5251-                                    allItems[tName] = (allItems[tName] || 0) + 1;
+5252-                                  });
+5253-                                }
+5254-                              });
+5255-
+5256:                              return (
+5257-                                <div className="space-y-1.5">
+5258-                                  {Object.entries(allItems).map(([name, qty], idx) => (
+5259-                                    <div key={idx} className="flex justify-between items-start">
+5260-                                      <span className="text-sm font-bold text-[#3D2B1F] leading-tight">
+5261-                                        {name} - {qty}
+--
+5405-                  </div>
+5406-                </div>
+5407-              {inventory.map((item) => {
+5408-                const IconComponent = IconMap[item.icon] || Package;
+5409-                const isLowStock = item.stock <= (item.min || 0);
+5410:                return (
+5411-                  <div key={item.id} className="bg-white p-3 sm:p-4 rounded-2xl border border-[#3D2B1F]/5 shadow-sm flex items-center justify-between gap-2 relative group">
+5412-                    <div className="flex items-center gap-3 flex-1 min-w-0">
+5413-                      <div className={`shrink-0 h-10 w-10 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center overflow-hidden ${item.color}`}>
+5414-                         {item.imageUrl ? (
+5415-                           <img src={item.imageUrl.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/')} alt={item.name} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+--
+5736-                    >
+5737-                      <option value="">Pilih Menu...</option>
+5738-                      {ALL_MENU_ITEMS.map(item => {
+5739-                        const displayName = item.name === 'Add on' ? 'Add on' : item.name;
+5740-                        const displayPrice = item.price.startsWith('Rp') ? item.price : `Rp ${item.price}`;
+5741:                        return (
+5742-                          <option key={item.id} value={item.id}>{displayName} - {displayPrice}</option>
+5743-                        );
+5744-                      })}
+5745-                    </select>
+5746-                    <input 
+--
+5763-                      <p className="text-[10px] font-bold text-[#3D2B1F]/40 uppercase tracking-widest mb-2">Pilih Add-on:</p>
+5764-                      <div className="flex flex-wrap gap-2">
+5765-                        {getToppingsForItem(ALL_MENU_ITEMS.find(i => i.id === manualOrderSelectedItemId)?.name || '').map(topping => {
+5766-                          const activePrice = localToppingPrices[topping.name] !== undefined ? localToppingPrices[topping.name] : topping.defaultPrice;
+5767-                          const isSelected = manualOrderSelectedToppings.includes(topping.name);
+5768:                          return (
+5769-                            <div key={topping.name} className={`flex items-stretch rounded-full text-xs font-bold transition-all border overflow-hidden ${
+5770-                              isSelected
+5771-                                ? 'bg-[#3D2B1F] text-white border-[#3D2B1F]'
+5772-                                : 'bg-white text-[#3D2B1F] border-[#3D2B1F]/10'
+5773-                            }`}>
+--
+5821-                                const matchPrice = tNameStr.match(/^(.*?)(?:\s*\+Rp\s*(\d+))?$/);
+5822-                                const tName = matchPrice ? matchPrice[1].trim() : tNameStr;
+5823-                                const tPrice = matchPrice && matchPrice[2] ? parseInt(matchPrice[2]) : 
+5824-                                  (tName.toLowerCase() === 'telur' ? 3000 : (tName.toLowerCase() === 'sosis' ? 1000 : 0));
+5825-                                
+5826:                                return (
+5827-                                  <li key={tIdx} className="text-[9px] text-[#3D2B1F]/60 flex items-center justify-between w-full">
+5828-                                    <span className="italic">+{tName}</span>
+5829-                                    {tPrice > 0 && <span className="whitespace-nowrap font-medium text-[#3D2B1F]">+Rp {tPrice.toLocaleString()}</span>}
+5830-                                  </li>
+5831-                                );
+--
+6022-                    >
+6023-                      <option value="">Pilih Menu...</option>
+6024-                      {ALL_MENU_ITEMS.map(item => {
+6025-                        const displayName = item.name === 'Add on' ? 'Add on' : item.name;
+6026-                        const displayPrice = item.price.startsWith('Rp') ? item.price : `Rp ${item.price}`;
+6027:                        return (
+6028-                          <option key={item.id} value={item.id}>{displayName} - {displayPrice}</option>
+6029-                        );
+6030-                      })}
+6031-                    </select>
+6032-                    <input 
+--
+6049-                      <p className="text-[10px] font-bold text-[#3D2B1F]/40 uppercase tracking-widest mb-2">Pilih Add-on:</p>
+6050-                      <div className="flex flex-wrap gap-2">
+6051-                        {getToppingsForItem(ALL_MENU_ITEMS.find(i => i.id === manualOrderSelectedItemId)?.name || '').map(topping => {
+6052-                          const activePrice = localToppingPrices[topping.name] !== undefined ? localToppingPrices[topping.name] : topping.defaultPrice;
+6053-                          const isSelected = manualOrderSelectedToppings.includes(topping.name);
+6054:                          return (
+6055-                            <div key={topping.name} className={`flex items-stretch rounded-full text-xs font-bold transition-all border overflow-hidden ${
+6056-                              isSelected
+6057-                                ? 'bg-[#3D2B1F] text-white border-[#3D2B1F]'
+6058-                                : 'bg-white text-[#3D2B1F] border-[#3D2B1F]/10'
+6059-                            }`}>
+--
+6107-                                const matchPrice = tNameStr.match(/^(.*?)(?:\s*\+Rp\s*(\d+))?$/);
+6108-                                const tName = matchPrice ? matchPrice[1].trim() : tNameStr;
+6109-                                const tPrice = matchPrice && matchPrice[2] ? parseInt(matchPrice[2]) : 
+6110-                                  (tName.toLowerCase() === 'telur' ? 3000 : (tName.toLowerCase() === 'sosis' ? 1000 : 0));
+6111-                                
+6112:                                return (
+6113-                                  <li key={tIdx} className="text-[9px] text-[#3D2B1F]/60 flex items-center justify-between w-full">
+6114-                                    <span className="italic">+{tName}</span>
+6115-                                    {tPrice > 0 && <span className="whitespace-nowrap font-medium text-[#3D2B1F]">+Rp {tPrice.toLocaleString()}</span>}
+6116-                                  </li>
+6117-                                );
+--
+6556-      onRateOrder(order.id, rating, feedback);
+6557-      setTimeout(() => setIsSubmitting(false), 500);
+6558-    }
+6559-  };
+6560-
+6561:  return (
+6562-    <div className="bg-white p-4 rounded-[2rem] border border-[#3D2B1F]/5 shadow-sm">
+6563-      <div className="flex justify-between items-center mb-2">
+6564-        <div className="flex flex-col">
+6565-          <span className="text-xs font-bold text-[#3D2B1F]/60">#{order.orderNumber || order.id.slice(-4)}</span>
+6566-          <span className={`text-[10px] font-bold uppercase ${order.status === 'selesai' ? 'text-green-500' : order.status === 'dibatalkan' ? 'text-red-500' : 'text-orange-500'}`}>
+--
+6600-                  allItems[tName] = (allItems[tName] || 0) + 1;
+6601-                });
+6602-              }
+6603-            });
+6604-
+6605:            return (
+6606-              <div className="space-y-2">
+6607-                {Object.entries(allItems).map(([name, qty], idx) => (
+6608-                  <div key={idx} className="flex justify-between items-start">
+6609-                    <span className="text-sm text-[#3D2B1F] font-bold leading-tight flex-1 pr-4">
+6610-                      {name} - {qty}
+--
+6833-    return "Selamat Malam";
+6834-  };
+6835-
+6836-  const menuItems = ALL_MENU_ITEMS;
+6837-
+6838:  return (
+6839-    <motion.div 
+6840-      key="home"
+6841-      initial={{ opacity: 0, x: 20 }}
+6842-      animate={{ opacity: 1, x: 0 }}
+6843-      exit={{ opacity: 0, x: -20 }}
+--
+6880-              >
+6881-                <Bell size={20} />
+6882-                {orders.filter(o => {
+6883-                  if (dismissedNotifs.includes(String(o.id))) return false;
+6884-                  // Only count CURRENT customer's orders in the customer dashboard
+6885:                  return (o.customerName === userProfile.name && userProfile.name !== '') || (currentUser && o.uid === currentUser.uid);
+6886-                }).length > 0 && (
+6887-                  <div className="absolute top-3 right-3 h-2 w-2 bg-red-500 rounded-full"></div>
+6888-                )}
+6889-              </button>
+6890-              <div 
+--
+7110-                          return acc;
+7111-                        }, {})).map(([name, count]: [string, any]) => {
+7112-                          const isTelurGulung = cartItem.item.name.toLowerCase().includes('telur gulung');
+7113-                          const isSaus = name.toLowerCase().includes('saus') || name.toLowerCase().includes('sambal') || name.toLowerCase().includes('tomat');
+7114-                          
+7115:                          if (isSaus) { return ( <p key={name} className="text-[10px] font-bold text-[#3D2B1F] flex items-center gap-1"> {name.split('+')[0].split('Rp')[0].trim().toLowerCase()} </p> ); }
+7116-
+7117:                          return (
+7118-                            <p key={name} className="text-[10px] font-bold text-[#3D2B1F] flex items-center gap-1">
+7119-                              {name.split('+')[0].split('Rp')[0].trim().toLowerCase()} - {count}
+7120-                            </p>
+7121-                          );
+7122-                        })}
+--
+7618-                </div>
+7619-
+7620-                {orders.filter(o => {
+7621-                  if (dismissedNotifs.includes(String(o.id))) return false;
+7622-                  // Strictly enforce customer-only view in the customer dashboard
+7623:                  return (o.customerName === customerName && customerName !== '') || (currentUser && o.uid === currentUser.uid);
+7624-                }).slice(0, 15).map(order => {
+7625-                  let title = `Update Pesanan #${order.orderNumber || String(order.id).slice(-4).toUpperCase()}`;
+7626-                  let message = "";
+7627-                  
+7628-                  switch(order.status) {
+--
+7632-                    case 'selesai': message = "Pesanan selesai! Selamat menikmati hidangan kami."; break;
+7633-                    case 'dibatalkan': message = "Maaf, pesananmu telah dibatalkan."; break;
+7634-                    default: message = `Status pesananmu saat ini adalah ${order.status}.`;
+7635-                  }
+7636-
+7637:                  return (
+7638-                    <div key={order.id} className="mb-4 p-4 bg-white rounded-2xl shadow-sm border border-[#3D2B1F]/5 relative group">
+7639-                      <div className="flex justify-between items-start mb-2">
+7640-                        <span className="text-xs font-bold text-[#3D2B1F]/60 uppercase tracking-widest">{title}</span>
+7641-                        <div className="flex items-center gap-2">
+7642-                          <span className="text-[10px] text-[#3D2B1F]/40">
+--
+7708-    'Sosis': 1000,
+7709-    'Saus Tomat': 0,
+7710-    'Saus Sambal': 0,
+7711-  };
+7712-
+7713:  return (
+7714-    <motion.div 
+7715-      key="checkout"
+7716-      initial={{ opacity: 0, x: 20 }}
+7717-      animate={{ opacity: 1, x: 0 }}
+7718-      exit={{ opacity: 0, x: -20 }}
+--
+7756-                          }, {})).map(([name, count]: [string, any]) => {
+7757-                            const cleanName = name.split('+')[0].split('Rp')[0].trim().toLowerCase();
+7758-                            const isSaus = cleanName.includes('saus') || cleanName.includes('sambal') || cleanName.includes('tomat');
+7759-                            
+7760-                            if (isSaus) {
+7761:                              return (
+7762-                                <p key={name} className="font-sans font-bold text-[#3D2B1F]">
+7763-                                  {cleanName}
+7764-                                </p>
+7765-                              );
+7766-                            }
+7767-                            
+7768:                            return (
+7769-                              <p key={name} className="font-sans font-bold text-[#3D2B1F]">
+7770-                                {cleanName} - {count}
+7771-                              </p>
+7772-                            );
+7773-                          })}
+--
+8038-    });
+8039-  };
+8040-
+8041-  const isTelurGulung = item.name === 'Telur Gulung' || item.name === 'Telur Gulung Sosis';
+8042-
+8043:  return (
+8044-    <motion.div 
+8045-      key="detail"
+8046-      initial={{ opacity: 0, y: 20 }}
+8047-      animate={{ opacity: 1, y: 0 }}
+8048-      exit={{ opacity: 0, y: 20 }}
+--
+8086-                Add On :
+8087-              </h3>
+8088-              <div className="space-y-3">
+8089-                {toppings.map((topping, i) => {
+8090-                  const count = getToppingCount(topping.name);
+8091:                  return (
+8092-                  <div 
+8093-                    key={i} 
+8094-                    className="flex items-center justify-between group"
+8095-                  >
+8096-                    <div className="flex items-center gap-4">
+--
+8222-  const hasActiveOrder = activeOrders.length > 0;
+8223-  const hasAnyOrder = activeOrders.length > 0;
+8224-
+8225-  useEffect(() => {
+8226-    const interval = setInterval(() => setNow(Date.now()), 1000);
+8227:    return () => clearInterval(interval);
+8228-  }, []);
+8229-
+8230-  const handleProfileClick = () => {
+8231-    onGoHome('pengaturan');
+8232-  };
+8233-
+8234:  return (
+8235-    <motion.div 
+8236-      key="status"
+8237-      initial={{ opacity: 0, scale: 0.95 }}
+8238-      animate={{ opacity: 1, scale: 1 }}
+8239-      exit={{ opacity: 0, scale: 1.05 }}
+--
+8281-              const elapsed = (now - startTime) / 1000;
+8282-              const duration = 600; // 10 minutes
+8283-              const remaining = Math.max(0, duration - elapsed);
+8284-              const orderStatus = primaryOrder.status;
+8285-
+8286:              return (
+8287-                <div className="flex flex-col items-center">
+8288-                  {/* Video at the top - Full Width */}
+8289-                  <div className="w-full mb-8 rounded-b-[3.5rem] overflow-hidden shadow-2xl">
+8290-                    <video
+8291-                      src="/video-elang.mp4"
+--
+8360-                                  return acc;
+8361-                                }, {});
+8362-                                const toppingsTotal = (item.toppings || []).reduce((acc: number, t: string) => acc + getToppingPrice(t), 0);
+8363-                                const baseItemPrice = item.totalPrice - toppingsTotal;
+8364-
+8365:                                return (
+8366-                                <div key={idx} className="flex flex-col border-b border-dashed border-[#3D2B1F]/20 pb-4 mb-4 last:border-0 last:pb-0 last:mb-0">
+8367-                                  <div className="flex justify-between items-start">
+8368-                                    <p className="text-sm font-bold text-[#3D2B1F]">
+8369-                                      {item.item.name} - {item.quantity}
+8370-                                    </p>
+--
+8375-                                  {item.toppings && item.toppings.length > 0 && (
+8376-                                    <div className="mt-2 pt-2 border-t border-dashed border-[#3D2B1F]/20">
+8377-                                      <p className="text-[10px] text-[#3D2B1F]/60 uppercase tracking-widest mb-1 font-bold">Add on:</p>
+8378-                                      {Object.entries(toppingCounts).map(([tName, tCount]: [string, any], tIdx) => {
+8379-                                        const cleanName = tName.replace(/\s*\+?\s*Rp\s*[\d\.]+/gi, '').trim();
+8380:                                        return (
+8381-                                        <div key={tIdx} className="flex justify-between items-start text-xs text-[#3D2B1F]/80">
+8382-                                          <p className="font-bold">{cleanName} - {tCount}</p>
+8383-                                          <p className="font-bold">Rp {(tCount * getToppingPrice(tName)).toLocaleString()}</p>
+8384-                                        </div>
+8385-                                      )})}
+--
+8481-  const [feedback, setFeedback] = useState('');
+8482-  const [isSubmitting, setIsSubmitting] = useState(false);
+8483-
+8484-  if (!show) return null;
+8485-  
+8486:  return (
+8487-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
+8488-      <motion.div 
+8489-        initial={{ opacity: 0, scale: 0.95 }}
+8490-        animate={{ opacity: 1, scale: 1 }}
+8491-        className="bg-white rounded-[2rem] p-6 shadow-2xl w-full max-w-sm"
+--
+8609-
+8610-  const pricePerItem = calculateItemPrice(item.name, item.priceNum, selectedToppings);
+8611-  const toppingsTotal = selectedToppings.reduce((acc, t) => acc + getToppingPrice(t), 0);
+8612-  const totalPrice = (item.priceNum * quantity) + toppingsTotal;
+8613-
+8614:  return (
+8615-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+8616-      <motion.div 
+8617-        initial={{ opacity: 0, y: 100 }}
+8618-        animate={{ opacity: 1, y: 0 }}
+8619-        exit={{ opacity: 0, y: 100 }}
+--
+8660-          <div className="mb-6">
+8661-            <h4 className="font-bold text-[#3D2B1F] mb-3">Add-on</h4>
+8662-            <div className="space-y-3">
+8663-              {toppings.map((topping, idx) => {
+8664-                const count = getToppingCount(topping.name);
+8665:                return (
+8666-                <div key={idx} className="flex items-center justify-between p-3 rounded-2xl border border-[#3D2B1F]/10">
+8667-                  <div>
+8668-                    <p className="font-bold text-[#3D2B1F]">{topping.name}</p>
+8669-                    {topping.price > 0 && <p className="text-xs text-[#3D2B1F]/60">+ Rp {topping.price.toLocaleString()}</p>}
+8670-                  </div>
