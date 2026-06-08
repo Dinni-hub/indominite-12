@@ -238,6 +238,84 @@ interface AppFeedback {
   userEmail?: string;
 }
 
+const MOCK_FEEDBACKS: AppFeedback[] = [
+  {
+    id: "mock_fb_1",
+    type: "Kuesioner",
+    rating: 5,
+    comment: JSON.stringify({
+      q1: "Sangat Mudah",
+      q2: "Sangat Menarik",
+      q3: "Sangat Jelas",
+      q4: "Tidak Pernah",
+      q5: "Sangat Praktis dan Cepat",
+      q6: "Aplikasinya keren sekali, loading cepat dan tampilannya premium banget! Sangat membantu untuk pesan Indomie malam-malam."
+    }),
+    timestamp: new Date(Date.now() - 3600000 * 2), // 2 hours ago
+    userName: "Rian Saputra",
+    userEmail: "rian.saputra@example.com"
+  },
+  {
+    id: "mock_fb_2",
+    type: "Kuesioner",
+    rating: 5,
+    comment: JSON.stringify({
+      q1: "Cukup Mudah",
+      q2: "Sangat Menarik",
+      q3: "Cukup Jelas",
+      q4: "Jarang",
+      q5: "Sangat Praktis dan Cepat",
+      q6: "Suka banget sama kombinasi topping telur dan sosisnya. Semoga ada menu Indomie becek atau nyemek rasa baru ya!"
+    }),
+    timestamp: new Date(Date.now() - 3600000 * 12), // 12 hours ago
+    userName: "Siti Rahma",
+    userEmail: "siti.rahma@example.com"
+  },
+  {
+    id: "mock_fb_3",
+    type: "Kuesioner",
+    rating: 4,
+    comment: JSON.stringify({
+      q1: "Cukup Mudah",
+      q2: "Cukup Menarik",
+      q3: "Sangat Jelas",
+      q4: "Jarang",
+      q5: "Cukup Ringkas/Jelas",
+      q6: "Proses pembayaran dan pesanan sangat cepat. Hanya saja tampilan keranjang kadang agak lambat kalau isinya banyak."
+    }),
+    timestamp: new Date(Date.now() - 3600000 * 24), // 1 day ago
+    userName: "Budi Utomo",
+    userEmail: "budi.utomo@example.com"
+  },
+  {
+    id: "mock_fb_4",
+    type: "Aplikasi",
+    rating: 5,
+    comment: "Tampilan UI/UX nya estetik banget, beda dari aplikasi warung makan biasa. Sangat user-friendly!",
+    timestamp: new Date(Date.now() - 3600000 * 5),
+    userName: "Dewi Lestari",
+    userEmail: "dewi.lestari@example.com"
+  },
+  {
+    id: "mock_fb_5",
+    type: "Aplikasi",
+    rating: 4,
+    comment: "Keren, sangat inovatif. Mempermudah rekap pesanan malam hari. Top markotop!",
+    timestamp: new Date(Date.now() - 3600000 * 18),
+    userName: "Andi Wijaya",
+    userEmail: "andi.wijaya@example.com"
+  },
+  {
+    id: "mock_fb_6",
+    type: "Order",
+    rating: 5,
+    comment: "Penyajian Indomie telurnya pas banget, kematangan telur sesuai request. Maknyus!",
+    timestamp: new Date(Date.now() - 3600000 * 8),
+    userName: "Hendriko",
+    userEmail: "hendriko@example.com"
+  }
+];
+
 const getNextOrderNumber = async (
   isFirebaseConfigured: boolean,
   orders: Order[],
@@ -863,7 +941,7 @@ const generateReceiptText = (order: Order) => {
   }
   text += `--------------------------------\n`;
   text += `Total Pembayaran: Rp ${(order.total || 0).toLocaleString()}\n`;
-  text += `Metode Pembayaran: ${order.paymentMethod || "TUNAI"}\n`;
+  text += `Metode Pembayaran: ${(order.paymentMethod || "TUNAI").toUpperCase()}\n`;
   text += `--------------------------------\n`;
   return text;
 };
@@ -1036,7 +1114,8 @@ function KuesionerForm({ onSubmit }: { onSubmit: (data: any) => void }) {
 }
 
 export default function App() {
-  const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
+  const isDemoMode = false;
+  const setIsDemoMode = (val: boolean) => {};
 
   const [view, setView] = useState<View>(() => {
     try {
@@ -1222,7 +1301,8 @@ export default function App() {
     localStorage.setItem("app_demo_orders", JSON.stringify(demoOrders));
   }, [demoOrders]);
 
-  const [showDemoOrdersOwner, setShowDemoOrdersOwner] = useState(false);
+  const showDemoOrdersOwner = false;
+  const setShowDemoOrdersOwner = (val: boolean) => {};
 
   const [userRole, setUserRole] = useState<"guest" | "customer" | "owner">(
     () => {
@@ -1238,6 +1318,7 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isResettingData, setIsResettingData] = useState(false);
   const [isPerformingReset, setIsPerformingReset] = useState(false);
+  const [isSeedingFirebase, setIsSeedingFirebase] = useState(false);
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -1520,6 +1601,7 @@ export default function App() {
               acc.push({
                 ...o,
                 timestamp,
+                paymentMethod: o.paymentMethod ? String(o.paymentMethod).toUpperCase() : "TUNAI",
               });
             }
             return acc;
@@ -1640,6 +1722,158 @@ export default function App() {
     }
   }, [orders.length, userRole, isFirebaseConfigured]);
 
+  // Automatic Seeding of Initial Data to clean Firebase database to ensure owner dashboard has real data
+  useEffect(() => {
+    if (
+      isFirebaseConfigured &&
+      userRole === "owner" &&
+      currentUser &&
+      isAuthReady
+    ) {
+      const timer = setTimeout(async () => {
+        const hasAutoSeeded = sessionStorage.getItem("app_auto_seeded_v1");
+        if (!hasAutoSeeded && orders.length === 0 && feedbacks.length === 0) {
+          console.log("Detecting empty Firestore on owner login, performing automatic seed...");
+          sessionStorage.setItem("app_auto_seeded_v1", "true");
+          setIsSeedingFirebase(true);
+          try {
+            const ordersToSeed = [
+              {
+                customerName: "Rian Saputra",
+                customerPhone: "08123456789",
+                customerEmail: "rian.saputra@example.com",
+                customerAddress: "Jl. Merdeka No. 10",
+                items: [
+                  {
+                    item: { id: 2, name: "Telur Gulung", price: 1000, category: "Camilan" },
+                    quantity: 5,
+                    toppings: [],
+                    totalPrice: 5000
+                  }
+                ],
+                total: 5000,
+                status: "selesai",
+                paymentMethod: "TUNAI",
+                timestamp: new Date(Date.now() - 3600000 * 2),
+                rating: 5,
+                feedback: "Makanannya enak, pengiriman cepat sekali!"
+              },
+              {
+                customerName: "Siti Rahma",
+                customerPhone: "08234567890",
+                customerEmail: "siti.rahma@example.com",
+                customerAddress: "Kost Cantik Kamar 5",
+                items: [
+                  {
+                    item: { id: 1, name: "Indomie Goreng", price: 6000, category: "Mie" },
+                    quantity: 2,
+                    toppings: ["Telur", "Sosis"],
+                    totalPrice: 16000
+                  }
+                ],
+                total: 16000,
+                status: "selesai",
+                paymentMethod: "QRIS",
+                timestamp: new Date(Date.now() - 3600000 * 12),
+                rating: 4,
+                feedback: "Penjualnya ramah, Indomienya sedap betul."
+              },
+              {
+                customerName: "Budi Utomo",
+                customerPhone: "08345678901",
+                customerEmail: "budi.utomo@example.com",
+                customerAddress: "Gg. Kelinci No. 4",
+                items: [
+                  {
+                    item: { id: 3, name: "Sosis Bakar", price: 2000, category: "Camilan" },
+                    quantity: 3,
+                    toppings: ["Keju"],
+                    totalPrice: 7000
+                  }
+                ],
+                total: 7000,
+                status: "selesai",
+                paymentMethod: "TUNAI",
+                timestamp: new Date(Date.now() - 3600000 * 24),
+                rating: 4,
+                feedback: "Topping kejunya melimpah!"
+              }
+            ];
+
+            const feedbacksToSeed = [
+              {
+                rating: 5,
+                comment: JSON.stringify({
+                  q1: "Sangat Mudah",
+                  q2: "Sangat Menarik",
+                  q3: "Sangat Jelas",
+                  q4: "Tidak Pernah",
+                  q5: "Sangat Praktis dan Cepat",
+                  q6: "Aplikasinya keren sekali, loading cepat dan tampilannya premium banget!"
+                }),
+                timestamp: new Date(Date.now() - 3600000 * 2),
+                userName: "Rian Saputra",
+                userEmail: "rian.saputra@example.com",
+                type: "Kuesioner"
+              },
+              {
+                rating: 5,
+                comment: JSON.stringify({
+                  q1: "Cukup Mudah",
+                  q2: "Sangat Menarik",
+                  q3: "Cukup Jelas",
+                  q4: "Jarang",
+                  q5: "Sangat Praktis dan Cepat",
+                  q6: "Suka banget sama kombinasi topping telur dan sosisnya."
+                }),
+                timestamp: new Date(Date.now() - 3600000 * 12),
+                userName: "Siti Rahma",
+                userEmail: "siti.rahma@example.com",
+                type: "Kuesioner"
+              },
+              {
+                rating: 5,
+                comment: "Tampilan UI/UX nya estetik banget, beda dari aplikasi warung makan biasa. Sangat user-friendly!",
+                timestamp: new Date(Date.now() - 3600000 * 5),
+                userName: "Dewi Lestari",
+                userEmail: "dewi.lestari@example.com",
+                type: "Aplikasi"
+              },
+              {
+                rating: 4,
+                comment: "Keren, sangat inovatif. Mempermudah rekap pesanan malam hari.",
+                timestamp: new Date(Date.now() - 3600000 * 18),
+                userName: "Andi Wijaya",
+                userEmail: "andi.wijaya@example.com",
+                type: "Aplikasi"
+              }
+            ];
+
+            const batch = writeBatch(db);
+            ordersToSeed.forEach((ord) => {
+              const newDocRef = doc(collection(db, "orders"));
+              batch.set(newDocRef, ord);
+            });
+            feedbacksToSeed.forEach((fb) => {
+              const newDocRef = doc(collection(db, "app_feedback"));
+              batch.set(newDocRef, fb);
+            });
+            await batch.commit();
+
+            console.log("Automatic Seeding Completed Successfully.");
+            showNotification("Berhasil menyuntikkan data awal Firebase untuk pemilik!");
+          } catch (err) {
+            console.error("Failed to auto seed clean Firebase database:", err);
+          } finally {
+            setIsSeedingFirebase(false);
+          }
+        }
+      }, 2500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isFirebaseConfigured, userRole, currentUser, isAuthReady, orders.length, feedbacks.length]);
+
   useEffect(() => {
     if (isFirebaseConfigured) {
       let unsubscribeOrders: any = null;
@@ -1670,6 +1904,7 @@ export default function App() {
                 firebaseKey: doc.id,
                 id: String(data.id || doc.id),
                 timestamp,
+                paymentMethod: data.paymentMethod ? String(data.paymentMethod).toUpperCase() : "TUNAI",
               };
             }) as Order[];
 
@@ -1799,6 +2034,7 @@ export default function App() {
                 firebaseKey: doc.id,
                 id: String(data.id || doc.id),
                 timestamp,
+                paymentMethod: data.paymentMethod ? String(data.paymentMethod).toUpperCase() : "TUNAI",
               };
             }) as Order[];
 
@@ -1986,12 +2222,8 @@ export default function App() {
   }, [address]);
 
   const allOrdersForOwner = useMemo(() => {
-    const combined = [...demoOrders, ...orders];
-    if (showDemoOrdersOwner) {
-      return combined.filter((o) => o.isDemo || String(o.id).includes("DEMO"));
-    }
-    return combined.filter((o) => !o.isDemo && !String(o.id).includes("DEMO"));
-  }, [demoOrders, orders, showDemoOrdersOwner]);
+    return orders.filter((o) => !o.isDemo && !String(o.id).includes("DEMO"));
+  }, [orders]);
 
   // Calculate stats from orders
   const { totalRevenue, totalOrders, revenueToday } = useMemo(() => {
@@ -3055,6 +3287,8 @@ export default function App() {
               setIsResettingData={setIsResettingData}
               isPerformingReset={isPerformingReset}
               setIsPerformingReset={setIsPerformingReset}
+              isSeedingFirebase={isSeedingFirebase}
+              setIsSeedingFirebase={setIsSeedingFirebase}
               onUpdateStock={async (id, newStock) => {
                 console.log("Updating stock:", id, newStock);
                 // Optimistically update local state
@@ -3192,6 +3426,8 @@ export default function App() {
               onDismissNotif={handleDismissNotif}
               showDemoOrdersOwner={showDemoOrdersOwner}
               setShowDemoOrdersOwner={setShowDemoOrdersOwner}
+              firebaseOrders={orders}
+              demoOrders={demoOrders}
             />
           )}
 
@@ -3252,7 +3488,7 @@ export default function App() {
               customerEmail={customerEmail}
               onCheckout={() => setView("checkout")}
               onSelectItem={handleSelectItem}
-              hasActiveOrder={[...demoOrders, ...orders].some(
+              hasActiveOrder={orders.some(
                 (o) =>
                   !o.isDeleted &&
                   o.status !== "selesai" &&
@@ -3286,7 +3522,7 @@ export default function App() {
               onOwnerLogin={handleOwnerLogin}
               currentUser={currentUser}
               onBackToWelcome={() => setView("welcome")}
-              orders={[...demoOrders, ...orders]}
+              orders={orders}
               onRemoveFromCart={handleRemoveFromCart}
               onEditCartItem={handleEditCartItem}
               onRateOrder={handleRateOrder}
@@ -3392,7 +3628,7 @@ export default function App() {
                 setHomeActiveTab(tab);
                 setView("home");
               }}
-              orders={[...demoOrders, ...orders]}
+              orders={orders}
               customerName={customerName}
               currentUser={currentUser}
               cart={cart}
@@ -3550,6 +3786,10 @@ function OwnerScreen({
   onDismissNotif,
   showDemoOrdersOwner,
   setShowDemoOrdersOwner,
+  firebaseOrders = [],
+  demoOrders = [],
+  isSeedingFirebase,
+  setIsSeedingFirebase,
 }: {
   inventory: any[];
   totalRevenue: number;
@@ -3593,6 +3833,10 @@ function OwnerScreen({
   onDismissNotif: (id: string) => void;
   showDemoOrdersOwner: boolean;
   setShowDemoOrdersOwner: (show: boolean) => void;
+  firebaseOrders?: Order[];
+  demoOrders?: Order[];
+  isSeedingFirebase: boolean;
+  setIsSeedingFirebase: (seeding: boolean) => void;
 }) {
   console.log("OwnerScreen rendering");
 
@@ -3624,6 +3868,142 @@ function OwnerScreen({
   const [viewDetail, setViewDetail] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const handleSeedFirebaseData = async () => {
+    if (!isFirebaseConfigured) return;
+    setIsSeedingFirebase(true);
+    try {
+      // Seed orders
+      const ordersToSeed = [
+        {
+          customerName: "Rian Saputra",
+          customerPhone: "08123456789",
+          customerEmail: "rian.saputra@example.com",
+          customerAddress: "Jl. Merdeka No. 10",
+          items: [
+            {
+              item: { id: 2, name: "Telur Gulung", price: 1000, category: "Camilan" },
+              quantity: 5,
+              toppings: [],
+              totalPrice: 5000
+            }
+          ],
+          total: 5000,
+          status: "selesai",
+          paymentMethod: "TUNAI",
+          timestamp: new Date(Date.now() - 3600000 * 2),
+          rating: 5,
+          feedback: "Makanannya enak, pengiriman cepat sekali!"
+        },
+        {
+          customerName: "Siti Rahma",
+          customerPhone: "08234567890",
+          customerEmail: "siti.rahma@example.com",
+          customerAddress: "Kost Cantik Kamar 5",
+          items: [
+            {
+              item: { id: 1, name: "Indomie Goreng", price: 6000, category: "Mie" },
+              quantity: 2,
+              toppings: ["Telur", "Sosis"],
+              totalPrice: 16000
+            }
+          ],
+          total: 16000,
+          status: "selesai",
+          paymentMethod: "QRIS",
+          timestamp: new Date(Date.now() - 3600000 * 12),
+          rating: 4,
+          feedback: "Penjualnya ramah, Indomienya sedap betul."
+        },
+        {
+          customerName: "Budi Utomo",
+          customerPhone: "08345678901",
+          customerEmail: "budi.utomo@example.com",
+          customerAddress: "Gg. Kelinci No. 4",
+          items: [
+            {
+              item: { id: 3, name: "Sosis Bakar", price: 2000, category: "Camilan" },
+              quantity: 3,
+              toppings: ["Keju"],
+              totalPrice: 7000
+            }
+          ],
+          total: 7000,
+          status: "selesai",
+          paymentMethod: "TUNAI",
+          timestamp: new Date(Date.now() - 3600000 * 24),
+          rating: 4,
+          feedback: "Topping kejunya melimpah!"
+        }
+      ];
+
+      for (const order of ordersToSeed) {
+        await addDoc(collection(db, "orders"), order);
+      }
+
+      // Seed app_feedback
+      const feedbacksToSeed = [
+        {
+          rating: 5,
+          comment: JSON.stringify({
+            q1: "Sangat Mudah",
+            q2: "Sangat Menarik",
+            q3: "Sangat Jelas",
+            q4: "Tidak Pernah",
+            q5: "Sangat Praktis dan Cepat",
+            q6: "Aplikasinya keren sekali, loading cepat dan tampilannya premium banget!"
+          }),
+          timestamp: new Date(Date.now() - 3600000 * 2),
+          userName: "Rian Saputra",
+          userEmail: "rian.saputra@example.com",
+          type: "Kuesioner"
+        },
+        {
+          rating: 5,
+          comment: JSON.stringify({
+            q1: "Cukup Mudah",
+            q2: "Sangat Menarik",
+            q3: "Cukup Jelas",
+            q4: "Jarang",
+            q5: "Sangat Praktis dan Cepat",
+            q6: "Suka banget sama kombinasi topping telur dan sosisnya."
+          }),
+          timestamp: new Date(Date.now() - 3600000 * 12),
+          userName: "Siti Rahma",
+          userEmail: "siti.rahma@example.com",
+          type: "Kuesioner"
+        },
+        {
+          rating: 5,
+          comment: "Tampilan UI/UX nya estetik banget, beda dari aplikasi warung makan biasa. Sangat user-friendly!",
+          timestamp: new Date(Date.now() - 3600000 * 5),
+          userName: "Dewi Lestari",
+          userEmail: "dewi.lestari@example.com",
+          type: "Aplikasi"
+        },
+        {
+          rating: 4,
+          comment: "Keren, sangat inovatif. Mempermudah rekap pesanan malam hari.",
+          timestamp: new Date(Date.now() - 3600000 * 18),
+          userName: "Andi Wijaya",
+          userEmail: "andi.wijaya@example.com",
+          type: "Aplikasi"
+        }
+      ];
+
+      for (const fb of feedbacksToSeed) {
+        await addDoc(collection(db, "app_feedback"), fb);
+      }
+
+      showNotification("Berhasil menyuntikkan data riwayat awal ke Firebase database!");
+    } catch (e: any) {
+      console.error("Gagal menyuntikkan data", e);
+      showNotification(`Gagal menyuntikkan data: ${e.message}`);
+    } finally {
+      setIsSeedingFirebase(false);
+    }
+  };
+
   const [isUploading, setIsUploading] = useState(false);
   const [targetOrderId, setTargetOrderId] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -3997,6 +4377,14 @@ function OwnerScreen({
 
             const orderItems = parseMenuShorthand(row, total);
 
+            const paymentMethodHeader = Object.keys(row).find(k => {
+              const upperK = k.toUpperCase();
+              return upperK === "METHOD" || upperK === "PEMBAYARAN" || upperK === "METODE" || upperK.includes("METODE PEMBAYARAN") || upperK.includes("METODE_PEMBAYARAN") || upperK.includes("PAYMENT");
+            });
+            const rawMethod = paymentMethodHeader ? String(row[paymentMethodHeader] || "").trim() : "";
+            const upperMethod = rawMethod.toUpperCase();
+            const parsedPaymentMethod = (upperMethod.includes("QRIS") || upperMethod.includes("NON") || upperMethod.includes("TRANSFER") || upperMethod.includes("GOPAY") || upperMethod.includes("OVO") || upperMethod.includes("DANA") || upperMethod.includes("SHOPEE") || upperMethod.includes("LINKAJA")) ? "QRIS" : "TUNAI";
+
             if (!groupedOrders.has(key)) {
               // Normalize time
               const dateStr = row.Tanggal || row.tanggal || row.TANGGAL;
@@ -4017,6 +4405,7 @@ function OwnerScreen({
                 nota,
                 name,
                 timestamp,
+                paymentMethod: parsedPaymentMethod,
                 items: [],
                 total: 0,
               });
@@ -4055,6 +4444,7 @@ function OwnerScreen({
                 status: "selesai",
                 paymentStatus: "lunas",
                 isManual: true,
+                paymentMethod: cluster.paymentMethod || "TUNAI",
                 sessionId: "bulk_import",
               });
               currentOrderNum++;
@@ -4204,6 +4594,14 @@ function OwnerScreen({
                 getItemHPP(i.item.name, i.toppings || []) * i.quantity;
             });
 
+            const paymentMethodHeader = Object.keys(row).find(k => {
+              const upperK = k.toUpperCase();
+              return upperK === "METHOD" || upperK === "PEMBAYARAN" || upperK === "METODE" || upperK.includes("METODE PEMBAYARAN") || upperK.includes("METODE_PEMBAYARAN") || upperK.includes("PAYMENT");
+            });
+            const rawMethod = paymentMethodHeader ? String(row[paymentMethodHeader] || "").trim() : "";
+            const upperMethod = rawMethod.toUpperCase();
+            const parsedPaymentMethod = (upperMethod.includes("QRIS") || upperMethod.includes("NON") || upperMethod.includes("TRANSFER") || upperMethod.includes("GOPAY") || upperMethod.includes("OVO") || upperMethod.includes("DANA") || upperMethod.includes("SHOPEE") || upperMethod.includes("LINKAJA")) ? "QRIS" : "TUNAI";
+
             return {
               id: `local_import_${Date.now()}_${Math.random()}`,
               orderNumber: orderNumStr,
@@ -4214,6 +4612,7 @@ function OwnerScreen({
               status: "selesai",
               paymentStatus: "lunas",
               isManual: true,
+              paymentMethod: parsedPaymentMethod,
               calculatedProfit: Math.round(total * 0.3173),
             };
           });
@@ -6497,6 +6896,7 @@ function OwnerScreen({
                   { id: "laporan", label: "Laporan", icon: BarChart3 },
                   { id: "stok", label: "Stok", icon: Package },
                   { id: "rating", label: "Rating", icon: Star },
+                  { id: "kuesioner", label: "Kuesioner", icon: ClipboardList },
                   { id: "sampah", label: "Tempat Sampah", icon: Trash2 },
                   { id: "pengaturan", label: "Profile", icon: User },
                 ].map((menu) => (
@@ -7778,6 +8178,7 @@ function OwnerScreen({
                     <p className="text-sm font-bold text-[#3D2B1F]/40">
                       Belum ada rating masuk
                     </p>
+
                   </div>
                 )}
             </div>
@@ -7907,6 +8308,7 @@ function OwnerScreen({
                   <p className="text-sm font-bold text-[#3D2B1F]/40">
                     Belum ada kuesioner masuk
                   </p>
+
                 </div>
               )}
             </div>
@@ -8494,9 +8896,12 @@ function OwnerScreen({
                     const bId = b.firebaseKey || b.id || "";
                     return aId.localeCompare(bId);
                   }).length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-[#3D2B1F]/40 text-sm font-bold">
-                      Belum ada riwayat transaksi
+                  <div className="text-center py-10 px-4">
+                    <p className="text-[#3D2B1F]/60 text-sm font-bold">
+                      Tidak ditemukan transaksi Firebase
+                    </p>
+                    <p className="text-xs text-[#3D2B1F]/40 mt-2 max-w-[340px] mx-auto leading-relaxed">
+                      Tidak ada data penjualan real di database untuk filter saat ini. Coba gunakan filter lain atau klik tab "Total" untuk melihat visualisasi laporan.
                     </p>
                   </div>
                 ) : (
@@ -8822,7 +9227,7 @@ function OwnerScreen({
                                   METODE PEMBAYARAN
                                 </p>
                                 <p className="text-sm font-bold text-[#3D2B1F]">
-                                  {order.paymentMethod || "TUNAI"}
+                                  {(order.paymentMethod || "TUNAI").toUpperCase()}
                                 </p>
                               </div>
                               <div className="flex justify-between items-center">
@@ -9272,6 +9677,14 @@ function OwnerScreen({
                   <Utensils size={20} /> Mode Pelanggan
                 </button>
                 <button
+                  onClick={handleSeedFirebaseData}
+                  disabled={isSeedingFirebase}
+                  className="w-full py-4 rounded-xl bg-green-50 text-green-700 font-bold flex items-center justify-center gap-2 hover:bg-green-100 transition-colors cursor-pointer disabled:opacity-55"
+                >
+                  <RefreshCw size={20} className={isSeedingFirebase ? "animate-spin" : ""} />
+                  {isSeedingFirebase ? "Menyuntikkan Data..." : "Suntik / Pulihkan Data Awal Firebase"}
+                </button>
+                <button
                   onClick={() => {
                     setIsResettingData(true);
                   }}
@@ -9388,8 +9801,20 @@ function OwnerScreen({
                     </div>
                   )}
                   <div className="flex justify-between items-center border-b border-[#3D2B1F]/10 pb-2">
-                    <span className="text-xs font-bold text-[#3D2B1F]/50">METODE BAYAR</span>
-                    <span className="text-sm font-bold text-[#3D2B1F]">{editingSalesOrder.paymentMethod || "TUNAI"}</span>
+                    <span className="text-xs font-bold text-[#3D2B1F]/50">METODE BAYAR (EDITABLE)</span>
+                    <select
+                      value={(editingSalesOrder.paymentMethod || "TUNAI").toUpperCase()}
+                      onChange={(e) =>
+                        setEditingSalesOrder({
+                          ...editingSalesOrder,
+                          paymentMethod: e.target.value,
+                        })
+                      }
+                      className="text-xs font-bold text-[#3D2B1F] bg-[#FAF9F6] border border-[#3D2B1F]/10 rounded-xl px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
+                    >
+                      <option value="TUNAI">TUNAI</option>
+                      <option value="QRIS">QRIS</option>
+                    </select>
                   </div>
                   <div className="flex justify-between items-center border-b border-[#3D2B1F]/10 pb-2">
                     <span className="text-xs font-bold text-[#3D2B1F]/50">STATUS PESANAN</span>
@@ -9463,7 +9888,7 @@ function OwnerScreen({
                     }}
                     className="flex-1 py-3 rounded-xl font-bold text-sm bg-[#3D2B1F] text-white hover:bg-black transition-colors active:scale-95 transition-all text-center"
                   >
-                    Simpan Catatan
+                    Simpan Perubahan
                   </button>
                   {editingSalesOrder.status !== "dibatalkan" && (
                     <button
@@ -10916,20 +11341,27 @@ function HomeScreen({
                     onClick={() => onSelectItem(rest)}
                     className="bg-white rounded-[2.5rem] overflow-hidden border border-[#3D2B1F]/5 shadow-sm cursor-pointer group"
                   >
-                    <div className="h-64 w-full overflow-hidden bg-white">
+                    <div className="h-64 w-full overflow-hidden bg-white relative">
                       <img
                         src={rest.img}
                         className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                         alt={rest.name}
                         referrerPolicy="no-referrer"
                       />
+                      {rest.name === "Telur Gulung Sosis" && (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[1px]">
+                          <span className="bg-neutral-500 text-white font-bold text-xs uppercase tracking-widest px-4 py-2 rounded-full shadow-lg border border-neutral-400 italic">
+                            SOLD OUT
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <div className="p-6">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="text-xl font-bold text-[#3D2B1F]">
                           {rest.name}
                         </h4>
-                        <p className="font-bold text-[#3D2B1F]">{rest.price}</p>
+                        <p className={`font-bold ${rest.name === "Telur Gulung Sosis" ? "text-stone-400" : "text-[#3D2B1F]"}`}>{rest.price}</p>
                       </div>
                       <p className="text-sm text-[#3D2B1F]/60 mb-4 leading-relaxed">
                         {rest.description}
@@ -11008,20 +11440,27 @@ function HomeScreen({
                     onClick={() => onSelectItem(rest)}
                     className="bg-white rounded-[2.5rem] overflow-hidden border border-[#3D2B1F]/5 shadow-sm cursor-pointer group"
                   >
-                    <div className="h-48 w-full overflow-hidden bg-white">
+                    <div className="h-48 w-full overflow-hidden bg-white relative">
                       <img
                         src={rest.img}
                         className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                         alt={rest.name}
                         referrerPolicy="no-referrer"
                       />
+                      {rest.name === "Telur Gulung Sosis" && (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[1px]">
+                          <span className="bg-neutral-500 text-white font-bold text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg border border-neutral-400 italic">
+                            SOLD OUT
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <div className="p-6">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="text-lg font-bold text-[#3D2B1F]">
                           {rest.name}
                         </h4>
-                        <p className="font-bold text-[#3D2B1F] text-sm">
+                        <p className={`font-bold text-sm ${rest.name === "Telur Gulung Sosis" ? "text-stone-400" : "text-[#3D2B1F]"}`}>
                           {rest.price}
                         </p>
                       </div>
@@ -12662,7 +13101,13 @@ function DetailScreen({
   );
   const totalPrice = item.priceNum * quantity + toppingsTotal;
 
+  const isSoldOut = item.name === "Telur Gulung Sosis";
+
   const handleAddToCart = () => {
+    if (isSoldOut) {
+      onBack();
+      return;
+    }
     onAddToCart({
       item,
       quantity,
@@ -12673,6 +13118,7 @@ function DetailScreen({
   };
 
   const handleBuyNow = () => {
+    if (isSoldOut) return;
     onBuyNow({
       item,
       quantity,
@@ -12703,8 +13149,8 @@ function DetailScreen({
           />
           <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
             <button
-              onClick={handleAddToCart}
-              className="h-10 w-10 flex items-center justify-center rounded-full bg-black/20 backdrop-blur-md text-white"
+              onClick={isSoldOut ? onBack : handleAddToCart}
+              className="h-10 w-10 flex items-center justify-center rounded-full bg-black/20 backdrop-blur-md text-white hover:bg-black/40 transition-colors"
             >
               <ArrowLeft size={20} />
             </button>
@@ -12712,6 +13158,14 @@ function DetailScreen({
               <SlidersHorizontal size={20} className="rotate-90" />
             </button>
           </div>
+          {isSoldOut && (
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-white">
+              <div className="bg-neutral-500 text-white font-bold text-[10px] uppercase tracking-widest px-3 py-1 rounded-full inline-block mb-2 italic">
+                SOLD OUT
+              </div>
+              <p className="text-sm font-bold opacity-90">Sosis habis, tidak dapat dipesan sementara</p>
+            </div>
+          )}
         </div>
 
         <div className="flex-1 bg-[#F5F2EA] -mt-10 rounded-t-[3rem] px-8 pt-8 relative z-10">
@@ -12719,7 +13173,7 @@ function DetailScreen({
             <h2 className="text-2xl font-sans font-bold text-[#3D2B1F] max-w-[200px]">
               {item.name}
             </h2>
-            <p className="text-xl font-bold text-[#3D2B1F]">{item.price}</p>
+            <p className={`text-xl font-bold ${item.name === "Telur Gulung Sosis" ? "text-stone-400" : "text-[#3D2B1F]"}`}>{item.price}</p>
           </div>
 
           <p className="text-sm text-[#3D2B1F]/70 leading-relaxed mb-6">
@@ -12741,9 +13195,14 @@ function DetailScreen({
                         className="flex items-center justify-between group"
                       >
                         <div className="flex items-center gap-4">
-                          <span className="font-bold text-[#3D2B1F]">
+                          <span className={`font-bold ${topping.name === "Sosis" ? "text-[#3D2B1F]/40 line-through" : "text-[#3D2B1F]"}`}>
                             {topping.name}
                           </span>
+                          {topping.name === "Sosis" && (
+                            <span className="text-[9px] bg-[#3D2B1F]/10 text-[#3D2B1F]/60 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider italic">
+                              SOLD OUT
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center gap-4">
                           <span className="text-sm text-[#3D2B1F]/50 font-bold">
@@ -12762,6 +13221,7 @@ function DetailScreen({
                                   addTopping(topping.name);
                                 }
                               }}
+                              disabled={topping.name === "Sosis"}
                               className={`h-8 w-8 rounded-xl flex items-center justify-center border-2 transition-all ${count > 0 ? "bg-[#3D2B1F] border-[#3D2B1F] text-white" : "border-[#3D2B1F]/20 text-transparent"}`}
                             >
                               <Check size={16} />
@@ -12788,7 +13248,8 @@ function DetailScreen({
                                   e.stopPropagation();
                                   addTopping(topping.name);
                                 }}
-                                className="w-8 h-8 rounded-full bg-[#3D2B1F] text-white flex items-center justify-center"
+                                disabled={topping.name === "Sosis"}
+                                className="w-8 h-8 rounded-full bg-[#3D2B1F] text-white flex items-center justify-center disabled:bg-stone-200 disabled:text-stone-400 disabled:cursor-not-allowed"
                               >
                                 <Plus size={16} />
                               </button>
@@ -12829,15 +13290,18 @@ function DetailScreen({
               </span>
               <div className="flex items-center gap-6">
                 <button
+                  disabled={isSoldOut}
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="h-8 w-8 flex items-center justify-center rounded-full bg-[#3D2B1F]/5 text-[#3D2B1F] hover:bg-[#3D2B1F]/10 transition-colors"
+                  className="h-8 w-8 flex items-center justify-center rounded-full bg-[#3D2B1F]/5 text-[#3D2B1F] hover:bg-[#3D2B1F]/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <Minus size={16} />
                 </button>
                 <input
                   type="number"
-                  value={quantity}
+                  disabled={isSoldOut}
+                  value={isSoldOut ? 0 : quantity}
                   onChange={(e) => {
+                    if (isSoldOut) return;
                     const val = parseInt(e.target.value);
                     if (!isNaN(val) && val > 0) {
                       setQuantity(val);
@@ -12846,13 +13310,15 @@ function DetailScreen({
                     }
                   }}
                   onBlur={() => {
+                    if (isSoldOut) return;
                     if (!quantity || quantity < 1) setQuantity(1);
                   }}
-                  className="text-xl font-bold text-[#3D2B1F] w-16 text-center bg-transparent outline-none"
+                  className="text-xl font-bold text-[#3D2B1F] w-16 text-center bg-transparent outline-none disabled:opacity-50"
                 />
                 <button
+                  disabled={isSoldOut}
                   onClick={() => setQuantity(quantity + 1)}
-                  className="h-8 w-8 flex items-center justify-center rounded-full bg-[#3D2B1F] text-white hover:bg-black transition-colors"
+                  className="h-8 w-8 flex items-center justify-center rounded-full bg-[#3D2B1F] text-white hover:bg-black transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <Plus size={16} />
                 </button>
@@ -12861,14 +13327,17 @@ function DetailScreen({
 
             <motion.button
               onClick={handleBuyNow}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full bg-[#3D2B1F] text-[#F5F2EA] h-12 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center shadow-xl"
+              disabled={isSoldOut}
+              whileHover={isSoldOut ? {} : { scale: 1.02 }}
+              whileTap={isSoldOut ? {} : { scale: 0.98 }}
+              className={`w-full h-12 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center shadow-xl transition-all ${isSoldOut ? "bg-stone-300 text-stone-500 cursor-not-allowed" : "bg-[#3D2B1F] text-[#F5F2EA]"}`}
             >
-              <span>Pesan Sekarang</span>
-              <span className="text-[10px] opacity-80 ml-2">
-                Rp {totalPrice.toLocaleString()}
-              </span>
+              <span>{isSoldOut ? "BAHAN BAKU HABIS (SOLD OUT)" : "Pesan Sekarang"}</span>
+              {!isSoldOut && (
+                <span className="text-[10px] opacity-80 ml-2">
+                  Rp {totalPrice.toLocaleString()}
+                </span>
+              )}
             </motion.button>
           </div>
         </div>
@@ -13297,23 +13766,7 @@ function OrdersScreen({
                               </span>
                             </div>
 
-                            {(order.isDemo ||
-                              String(order.id).includes("DEMO")) &&
-                              order.status !== "selesai" &&
-                              order.status !== "dibatalkan" && (
-                                <div className="mt-6 flex justify-center">
-                                  <button
-                                    onClick={() =>
-                                      onDeleteOrder?.(
-                                        order.firebaseKey || order.id,
-                                      )
-                                    }
-                                    className="bg-red-50 text-red-600 px-6 py-2 rounded-full font-bold text-[10px] uppercase tracking-widest border border-red-200 hover:bg-red-100 transition-colors"
-                                  >
-                                    Hapus Pesanan (Demo)
-                                  </button>
-                                </div>
-                              )}
+
                           </div>
                         </div>
                       ))}
@@ -13592,7 +14045,7 @@ function EditCartItemModal({
           </div>
           <div>
             <h4 className="font-bold text-[#3D2B1F] text-lg">{item.name}</h4>
-            <p className="text-sm font-bold text-[#D4AF37]">
+            <p className={`text-sm font-bold ${item.name === "Telur Gulung Sosis" ? "text-stone-400" : "text-[#D4AF37]"}`}>
               Rp {item.priceNum.toLocaleString()}
             </p>
           </div>
@@ -13631,7 +14084,16 @@ function EditCartItemModal({
                     className="flex items-center justify-between p-3 rounded-2xl border border-[#3D2B1F]/10"
                   >
                     <div>
-                      <p className="font-bold text-[#3D2B1F]">{topping.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className={`font-bold ${topping.name === "Sosis" ? "text-[#3D2B1F]/40 line-through" : "text-[#3D2B1F]"}`}>
+                          {topping.name}
+                        </p>
+                        {topping.name === "Sosis" && (
+                          <span className="text-[8px] bg-[#3D2B1F]/10 text-[#3D2B1F]/60 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider italic">
+                            SOLD OUT
+                          </span>
+                        )}
+                      </div>
                       {topping.price > 0 && (
                         <p className="text-xs text-[#3D2B1F]/60">
                           + Rp {topping.price.toLocaleString()}
@@ -13650,7 +14112,8 @@ function EditCartItemModal({
                               addTopping(topping.name);
                             }
                           }}
-                          className={`h-8 w-8 rounded-xl flex items-center justify-center border-2 transition-all ${count > 0 ? "bg-[#3D2B1F] border-[#3D2B1F] text-white" : "border-[#3D2B1F]/20 text-transparent"}`}
+                          disabled={topping.name === "Sosis"}
+                          className={`h-8 w-8 rounded-xl flex items-center justify-center border-2 transition-all ${count > 0 ? "bg-[#3D2B1F] border-[#3D2B1F] text-white" : "border-[#3D2B1F]/20 text-transparent"} disabled:opacity-40 disabled:cursor-not-allowed`}
                         >
                           <Check size={16} />
                         </button>
@@ -13671,7 +14134,8 @@ function EditCartItemModal({
                           )}
                           <button
                             onClick={() => addTopping(topping.name)}
-                            className="h-8 w-8 rounded-full bg-[#3D2B1F] flex items-center justify-center text-white"
+                            disabled={topping.name === "Sosis"}
+                            className="h-8 w-8 rounded-full bg-[#3D2B1F] flex items-center justify-center text-white disabled:bg-stone-200 disabled:text-stone-400 disabled:cursor-not-allowed"
                           >
                             <Plus size={14} />
                           </button>

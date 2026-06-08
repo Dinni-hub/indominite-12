@@ -10,7 +10,7 @@ service cloud.firestore {
     
     function isOwner() {
       let email = request.auth.token.email;
-      let isEmailOwner = isAuthenticated() && email != null && (email.lower() == 'indominite@gmail.com' || email.lower() == 'innanifiddinillah@gmail.com');
+      let isEmailOwner = isAuthenticated() && email != null && (email.lower() == 'indominite@gmail.com' || email.lower() == 'innanifiddinillah@gmail.com' || email.lower() == 'indominitemode@gmail.com');
       let hasSession = exists(/databases/$(database)/documents/owner_sessions/$(request.auth.uid));
       return isAuthenticated() && (isEmailOwner || hasSession);
     }
